@@ -9,6 +9,7 @@ import ProductsGrid from "@/components/ProductsGrid";
 import PartnersCarousel from "@/components/sections/PartnersCarousel";
 import TestimonialsCarousel from "@/components/sections/TestimonialsCarousel";
 import Contact from "@/components/sections/Contact";
+import ChatSDR from "@/components/ui/ChatSDR";
 import { Metadata } from "next";
 
 interface PageProps {
@@ -173,6 +174,12 @@ const seguradorasUnicas = Array.from(
             produtos={nomesDosProdutos} 
           />
         </section>
+        {/* AGENTE SDR */}
+        <ChatSDR 
+          corretoraId={corretora.id} 
+          corPrimaria={config.cor_primaria} 
+          nomeCorretora={corretora.nome_fantasia} 
+        />  
       </main>
 
       <Footer 
