@@ -264,8 +264,13 @@ export default function ChatSDR({ corretoraId, corPrimaria, nomeCorretora }: Cha
 
   const handleFinalizarChat = (falarComHumano: boolean) => {
     if (falarComHumano) {
-      const historico = messages.map(m => `${m.role === 'bot' ? 'Assistente' : 'Cliente'}: ${m.text}`).join('\n');
-      const msgZap = `Olá! Acabei de preencher os dados no site da ${nomeCorretora} e gostaria de falar com um consultor.\n\n*Resumo do Atendimento:*\n${historico}`;
+      // FILTRA APENAS AS RESPOSTAS DO USUÁRIO
+      const respostasCliente = messages
+        .filter(m => m.role === "user")
+        .map(m => `• ${m.text}`)
+        .join('\n');
+
+      const msgZap = `Olá! Acabei de preencher os dados no site da ${nomeCorretora} e gostaria de falar com um consultor.\n\n*Dados preenchidos:*\n${respostasCliente}`;
       
       const foneFinal = (whatsappComercial || "5548999999999").replace(/\D/g, "");
       const urlZap = `https://wa.me/${foneFinal}?text=${encodeURIComponent(msgZap)}`;
