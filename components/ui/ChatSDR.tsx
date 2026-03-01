@@ -238,14 +238,28 @@ export default function ChatSDR({ corretoraId, corPrimaria, nomeCorretora }: Cha
     const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     setMessages((prev) => [...prev, { role: "user", text: produtoNome, time: now }]);
     
-    // ATUALIZAÇÃO DO STATUS PARA QUALIFICADO
-    await supabase.from("tab_leads_site").update({ 
+    // LOG DE SEGURANÇA: Vamos ver se o ID existe antes de tentar o update
+    console.log("Tentando qualificar o Lead ID:", leadId);
+
+    if (!leadId) {
+      console.error("Erro: Não encontrei o ID do lead para atualizar.");
+      return;
+    }
+
+    // DISPARO PARA O BANCO
+    const { error } = await supabase.from("tab_leads_site").update({ 
       seguros_interesse: [produtoNome],
       status_processo: "qualificado" 
     }).eq("id", leadId);
 
-    setStep("HUMANO");
-    addBotMessage("Já tenho tudo o que preciso para sua pré-cotação! Gostaria de falar com um de nossos consultores agora pelo WhatsApp para finalizar?");
+    if (error) {
+      console.error("Erro ao atualizar status no Supabase:", error);
+    } else {
+      console.log("Lead qualificado com sucesso no banco!");
+      // SÓ AVANÇA O CHAT SE O BANCO DER OK
+      setStep("HUMANO");
+      addBotMessage("Já tenho tudo o que preciso para sua pré-cotação! Gostaria de falar com um de nossos consultores agora pelo WhatsApp para finalizar?");
+    }
   };
 
   const handleFinalizarChat = (falarComHumano: boolean) => {
