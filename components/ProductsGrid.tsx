@@ -6,7 +6,6 @@ import {
   Coins, Scale 
 } from "lucide-react";
 
-// Mapeamento de ícones (adicionei alguns extras para os novos slugs)
 const iconMap: Record<string, any> = {
   "equipamentos": <Laptop className="w-10 h-10" />,
   "agrícola": <Tractor className="w-10 h-10" />,
@@ -29,11 +28,21 @@ const iconMap: Record<string, any> = {
 interface Product {
   id: string;
   nome: string;
-  descricao?: string; // Adicionado conforme sua atualização no banco
+  descricao?: string;
 }
 
-export default function ProductsGrid({ produtos }: { produtos: Product[] }) {
+interface ProductsGridProps {
+  produtos: Product[];
+  corPrimaria: string;
+}
+
+export default function ProductsGrid({ produtos, corPrimaria }: ProductsGridProps) {
   if (!produtos || produtos.length === 0) return null;
+
+  const abrirChat = (e: React.MouseEvent) => {
+    // Se clicar no card, abre o chat, mas não impede a ancoragem visual
+    window.dispatchEvent(new CustomEvent("abrirChatSDR"));
+  };
 
   return (
     <section className="py-20 px-6 bg-gray-50/50 w-full">
@@ -41,20 +50,33 @@ export default function ProductsGrid({ produtos }: { produtos: Product[] }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {produtos.map((produto) => {
             const nomeMinusculo = produto.nome.toLowerCase();
-            
-            // Procura a chave no dicionário que está contida no nome do produto
             const iconKey = Object.keys(iconMap).find(key => nomeMinusculo.includes(key));
             const IconeFinal = iconKey ? iconMap[iconKey] : <ShieldCheck className="w-10 h-10" />;
             
-            const anchorId = `seguro-${produto.nome.replace(/\s+/g, '-').toLowerCase()}`;
+            // ID limpo para bater com o novo padrão do Navbar
+            const anchorId = produto.nome.replace(/\s+/g, '-').toLowerCase();
 
             return (
               <div 
                 key={produto.id} 
                 id={anchorId}
-                className="scroll-mt-40 bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all duration-500 flex flex-col items-center text-center group cursor-pointer hover:shadow-xl hover:-translate-y-1"
+                onClick={abrirChat}
+                /* scroll-mt-40 garante que o cabeçalho não cubra o card ao scrollar */
+                className="scroll-mt-40 bg-white p-8 rounded-3xl shadow-sm border border-gray-100 transition-all duration-500 flex flex-col items-center text-center group cursor-pointer hover:shadow-xl hover:-translate-y-1 target:ring-4 target:ring-offset-2"
+                style={({ "--tw-ring-color": corPrimaria } as any)}
               >
-                <div className="mb-6 p-4 rounded-2xl bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                <div 
+                  style={{ color: corPrimaria }}
+                  className="mb-6 p-4 rounded-2xl bg-gray-50 group-hover:bg-opacity-100 transition-all duration-300"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = corPrimaria;
+                    e.currentTarget.style.color = "#ffffff";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#f9fafb";
+                    e.currentTarget.style.color = corPrimaria;
+                  }}
+                >
                   {IconeFinal}
                 </div>
                 
@@ -66,7 +88,10 @@ export default function ProductsGrid({ produtos }: { produtos: Product[] }) {
                   {produto.descricao || "Proteção completa para você e seu patrimônio."}
                 </p>
                 
-                <span className="mt-auto text-primary font-bold text-sm inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                <span 
+                  style={{ color: corPrimaria }}
+                  className="mt-auto font-bold text-sm inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform"
+                >
                   SOLICITAR COTAÇÃO →
                 </span>
               </div>

@@ -11,6 +11,16 @@ interface ContactProps {
 
 export default function Contact({ cor, corretora, produtos }: ContactProps) {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [telefone, setTelefone] = useState("");
+
+  // Máscara de Telefone (Brasil)
+  const handlePhoneMask = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/^(\d{2})(\d)/g, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .replace(/(-\d{4})\d+?$/, "$1");
+  };
 
   const handleCheckboxChange = (nome: string) => {
     setSelectedProducts(prev => 
@@ -24,7 +34,8 @@ export default function Contact({ cor, corretora, produtos }: ContactProps) {
     const formData = new FormData(form);
     
     const mensagem = `Olá! Me chamo ${formData.get("nome")}.%0A` +
-                     `Tenho interesse nos seguintes seguros: ${selectedProducts.join(", ")}.%0A` +
+                     `Meu WhatsApp: ${telefone}.%0A` +
+                     `Tenho interesse nos seguintes seguros: ${selectedProducts.join(", ") || "Informados na consultoria"}.%0A` +
                      `E-mail: ${formData.get("email")}`;
     
     window.open(`https://wa.me/55${corretora?.whatsapp_comercial?.replace(/\D/g, "")}?text=${mensagem}`, "_blank");
@@ -35,21 +46,21 @@ export default function Contact({ cor, corretora, produtos }: ContactProps) {
 
   return (
     <section id="contato" className="py-20 bg-gray-50 border-t border-gray-100 w-full">
-      <div className="w-full max-w-[1440px] mx-auto px-6 md:px-12"> {/* Aumentado para visão mais ampla */}
+      <div className="w-full max-w-[1440px] mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 items-stretch">
           
-          {/* COLUNA 1: DADOS LEGAIS - Corrigido Contraste */}
+          {/* COLUNA 1: DADOS LEGAIS */}
           <div className="flex flex-col justify-center space-y-8 py-4">
             <div>
               <h3 className="text-3xl font-black uppercase tracking-tighter mb-2 text-gray-400">
                 Fale com a <span style={{ color: cor }}>Corretora</span>
               </h3>
               <p className="text-gray-800 font-bold text-xl leading-tight">
-                {corretora?.razao_social || "IMBISEG CORRETORA DE SEGUROS LTDA"}
+                {corretora?.razao_social || "NOME DA CORRETORA"}
               </p>
             </div>
 
-            <div className="space-y-6 text-sm text-gray-700 font-medium"> {/* Texto mais escuro */}
+            <div className="space-y-6 text-sm text-gray-700 font-medium">
               <div className="flex items-start gap-4">
                 <MapPin className="w-6 h-6 shrink-0" style={{ color: cor }} />
                 <p className="leading-relaxed">
@@ -69,9 +80,9 @@ export default function Contact({ cor, corretora, produtos }: ContactProps) {
             </div>
           </div>
 
-          {/* COLUNA 2: FORMULÁRIO - Ajustado Cores dos Inputs */}
+          {/* COLUNA 2: FORMULÁRIO COM TELEFONE */}
           <div className="bg-white p-8 md:p-10 rounded-[40px] shadow-xl shadow-gray-200/50 border border-gray-100">
-            <form onSubmit={handleWhatsAppRedirect} className="space-y-5">
+            <form onSubmit={handleWhatsAppRedirect} className="space-y-4">
               <div className="space-y-4">
                 <input 
                   name="nome" 
@@ -81,6 +92,19 @@ export default function Contact({ cor, corretora, produtos }: ContactProps) {
                   className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:ring-2 transition-all outline-none" 
                   style={{"--tw-ring-color": cor} as any} 
                 />
+                
+                {/* CAMPO TELEFONE ADICIONADO */}
+                <input 
+                  name="telefone" 
+                  type="tel" 
+                  placeholder="Seu WhatsApp (com DDD)" 
+                  value={telefone}
+                  onChange={(e) => setTelefone(handlePhoneMask(e.target.value))}
+                  required 
+                  className="w-full px-5 py-4 rounded-2xl bg-gray-50 border border-gray-100 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:ring-2 transition-all outline-none" 
+                  style={{"--tw-ring-color": cor} as any} 
+                />
+
                 <input 
                   name="email" 
                   type="email" 
@@ -122,7 +146,7 @@ export default function Contact({ cor, corretora, produtos }: ContactProps) {
             </form>
           </div>
 
-          {/* COLUNA 3: MAPA - Full Height e Cantos Arredondados */}
+          {/* COLUNA 3: MAPA */}
           <div className="h-[450px] lg:h-auto min-h-[400px] rounded-[40px] overflow-hidden shadow-lg border-4 border-white">
             <iframe
               width="100%"

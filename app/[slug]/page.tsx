@@ -79,26 +79,24 @@ export default async function Home({ params }: PageProps) {
     };
   });
 
-  // ... (dentro do componente Home, após nomesUnicos)
-
-/**
- * EXTRAÇÃO DE SEGURADORAS ÚNICAS:
- * Mapeia o portfólio para pegar as logos e nomes das seguradoras parceiras sem repetição.
- */
-const seguradorasUnicas = Array.from(
-  new Map(
-    portfolio
-      ?.filter((item: any) => item.base_seguradoras?.logo_url) // Apenas as que têm logo
-      .map((item: any) => [
-        item.base_seguradoras.id,
-        {
-          id: item.base_seguradoras.id,
-          nome: item.base_seguradoras.nome,
-          logo_url: item.base_seguradoras.logo_url
-        }
-      ])
-  ).values()
-);
+  /**
+   * EXTRAÇÃO DE SEGURADORAS ÚNICAS:
+   * Mapeia o portfólio para pegar as logos e nomes das seguradoras parceiras sem repetição.
+   */
+  const seguradorasUnicas = Array.from(
+    new Map(
+      portfolio
+        ?.filter((item: any) => item.base_seguradoras?.logo_url) // Apenas as que têm logo
+        .map((item: any) => [
+          item.base_seguradoras.id,
+          {
+            id: item.base_seguradoras.id,
+            nome: item.base_seguradoras.nome,
+            logo_url: item.base_seguradoras.logo_url
+          }
+        ])
+    ).values()
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -131,7 +129,7 @@ const seguradorasUnicas = Array.from(
           conteudo={config.sobre_conteudo} 
         />
 
-        {/* NOVO: CARROSSEL DE PARCEIROS (SEGURADORAS) */}
+        {/* CARROSSEL DE PARCEIROS (SEGURADORAS) */}
         {seguradorasUnicas.length > 0 && (
           <PartnersCarousel 
             cor={config.cor_primaria}
@@ -152,7 +150,11 @@ const seguradorasUnicas = Array.from(
             <h2 className="text-3xl font-black text-center mb-12 uppercase tracking-tighter">
               <span style={{ color: config.cor_primaria }}>Nossas Soluções</span>
             </h2>
-            <ProductsGrid produtos={produtosFormatados} />
+            {/* Agora passando corPrimaria para evitar erro de tipagem e permitir estilização dinâmica */}
+            <ProductsGrid 
+              produtos={produtosFormatados} 
+              corPrimaria={config.cor_primaria} 
+            />
           </div>
         </section>
 
@@ -174,7 +176,8 @@ const seguradorasUnicas = Array.from(
             produtos={nomesDosProdutos} 
           />
         </section>
-        {/* AGENTE SDR */}
+
+        {/* AGENTE SDR: Ativando o chat WhatsApp-style */}
         <ChatSDR 
           corretoraId={corretora.id} 
           corPrimaria={config.cor_primaria} 
