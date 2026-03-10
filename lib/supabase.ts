@@ -24,11 +24,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 })
 
 export async function fetchSiteConfig(domainOrSlug: string) {
-  // 1. Busca a configuração do site pelo slug ou domínio
+  // 1. Decodifica o host (ex: localhost%3A3000 -> localhost:3000)
+  const decodedHost = decodeURIComponent(domainOrSlug);
+  
+  // 2. Extrai o slug se for subdomínio
+  const cleanSlug = decodedHost.replace('.segurocrm.com.br', '');
+
+  // 3. Busca a configuração do site
   const { data: config, error: configError } = await supabase
     .from("tab_configuracoes_site")
     .select("*")
-    .or(`dominio.eq.${domainOrSlug},slug.eq.${domainOrSlug}`)
+    .or(`dominio.eq.${decodedHost},slug.eq.${cleanSlug}`)
     .eq("status_site", true)
     .maybeSingle();
 
@@ -37,8 +43,7 @@ export async function fetchSiteConfig(domainOrSlug: string) {
     return { data: null, corretora: null };
   }
 
-  // 2. Busca os dados da corretora usando o ID que veio da config
-  // Aqui pegamos facebook, instagram, logotipo_url, etc.
+  // 4. Busca os dados da corretora
   const { data: corretora, error: corrError } = await supabase
     .from("tab_corretora_config")
     .select("*")
